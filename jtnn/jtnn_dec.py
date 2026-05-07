@@ -8,6 +8,13 @@ import copy
 MAX_NB = 8
 MAX_DECODE_LEN = 100
 
+def dfs(stack, x, fa):
+    for y in x.neighbors:
+        if y.idx == fa.idx:
+            continue
+        stack.append((x, y, 1))
+        dfs(stack, y, x)
+        stack.append((y, x, 0))
 
 class JTNNDecoder(nn.Module):
 
