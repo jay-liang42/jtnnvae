@@ -8,6 +8,7 @@ version = "0.1.0"
 [dependencies]
 python = ">=3.11"
 numpy = ">=2.4.2,<3"
+scipy = "*"
 matplotlib = ">=3.10.8,<4"
 pandas = ">=3.0.1,<4"
 wandb = ">=0.25.0,<0.26"
@@ -17,6 +18,7 @@ ipykernel = ">=7.2.0,<8"
 jupyter = ">=1.1.1,<2"
 tqdm = ">=4.67.3,<5"
 datasets = ">=4.5.0,<5"
+pip = "*"
 
 [pypi-dependencies]
 torch = { version = "==2.10.0", index = "https://download.pytorch.org/whl/cu128" }
