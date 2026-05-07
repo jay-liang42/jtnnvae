@@ -2,7 +2,7 @@
 authors = ["Anthony Tong <atong28.usa@gmail.com>"]
 channels = ["https://prefix.dev/conda-forge"]
 name = "SMILES-VAE"
-platforms = ["linux-64"]
+platforms = ["linux-64", "win-64"]
 version = "0.1.0"
 
 [dependencies]
