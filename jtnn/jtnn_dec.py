@@ -187,11 +187,13 @@ class JTNNDecoder(nn.Module):
         pred_acc = (preds == pred_targets).float().mean()
 
         # stop loss
+        # stop loss
         stop_hiddens = torch.cat(stop_hiddens)
-        stop_vecs = torch.relu(self.U(stop_hiddens))
-        stop_scores = self.U_s(stop_vecs)
         
-        stop_targets = create_var(torch.Tensor(stop_targets)).view(-1, 1)
+        stop_vecs = torch.relu(self.U(stop_hiddens))
+        
+        stop_scores = self.U_s(stop_vecs).view(-1)
+        stop_targets = create_var(torch.Tensor(stop_targets)).view(-1)
         
         stop_loss = self.stop_loss(stop_scores, stop_targets) / len(mol_batch)
         
