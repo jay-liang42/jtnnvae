@@ -35,21 +35,20 @@ class JTPropVAE(nn.Module):
         self.jtnn = JTNNEncoder(vocab, hidden_size, self.embedding)
         self.jtmpn = JTMPN(hidden_size, depth)
         self.mpn = MPN(hidden_size, depth)
-        self.decoder = JTNNDecoder(vocab, hidden_size, latent_size / 2, self.embedding)
-
-        self.T_mean = nn.Linear(hidden_size, latent_size / 2)
-        self.T_var = nn.Linear(hidden_size, latent_size / 2)
-        self.G_mean = nn.Linear(hidden_size, latent_size / 2)
-        self.G_var = nn.Linear(hidden_size, latent_size / 2)
-        
+        self.decoder = JTNNDecoder(vocab, hidden_size, latent_size // 2, self.embedding)
+        self.T_mean = nn.Linear(hidden_size, latent_size // 2)
+        self.T_var = nn.Linear(hidden_size, latent_size // 2)
+        self.G_mean = nn.Linear(hidden_size, latent_size // 2)
+        self.G_var = nn.Linear(hidden_size, latent_size // 2)
+                
         self.propNN = nn.Sequential(
                 nn.Linear(self.latent_size, self.hidden_size),
                 nn.Tanh(),
                 nn.Linear(self.hidden_size, 1)
         )
         self.prop_loss = nn.MSELoss()
-        self.assm_loss = nn.CrossEntropyLoss(size_average=False)
-        self.stereo_loss = nn.CrossEntropyLoss(size_average=False)
+        self.assm_loss = nn.CrossEntropyLoss(reduction="sum")
+        self.stereo_loss = nn.CrossEntropyLoss(reduction="sum")
     
     def encode(self, mol_batch):
         set_batch_nodeID(mol_batch, self.vocab)
@@ -84,9 +83,11 @@ class JTPropVAE(nn.Module):
         z_log_var = torch.cat([tree_log_var,mol_log_var], dim=1)
         kl_loss = -0.5 * torch.sum(1.0 + z_log_var - z_mean * z_mean - torch.exp(z_log_var)) / batch_size
 
-        epsilon = create_var(torch.randn(batch_size, self.latent_size / 2), False)
+        eps_dim = self.latent_size // 2
+        epsilon = create_var(torch.randn(batch_size, eps_dim), False)
         tree_vec = tree_mean + torch.exp(tree_log_var / 2) * epsilon
-        epsilon = create_var(torch.randn(batch_size, self.latent_size / 2), False)
+        eps_dim = self.latent_size // 2
+        epsilon = create_var(torch.randn(batch_size, eps_dim), False)
         mol_vec = mol_mean + torch.exp(mol_log_var / 2) * epsilon
         
         word_loss, topo_loss, word_acc, topo_acc = self.decoder(mol_batch, tree_vec)
@@ -98,7 +99,7 @@ class JTPropVAE(nn.Module):
         prop_loss = self.prop_loss(self.propNN(all_vec).squeeze(), prop_label)
         
         loss = word_loss + topo_loss + assm_loss + 2 * stereo_loss + beta * kl_loss + prop_loss
-        return loss, kl_loss.data[0], word_acc, topo_acc, assm_acc, stereo_acc, prop_loss.data[0]
+        return loss, kl_loss.item(), word_acc, topo_acc, assm_acc, stereo_acc, prop_loss.item()
 
     def assm(self, mol_batch, mol_vec, tree_mess):
         cands = []
@@ -131,7 +132,7 @@ class JTPropVAE(nn.Module):
                 cur_score = scores.narrow(0, tot, ncand)
                 tot += ncand
 
-                if cur_score.data[label] >= cur_score.max().data[0]:
+                if cur_score[label].item() >= cur_score.max().item():
                     acc += 1
 
                 label = create_var(torch.LongTensor([label]))
@@ -165,7 +166,7 @@ class JTPropVAE(nn.Module):
         all_loss = []
         for label,le in labels:
             cur_scores = scores.narrow(0, st, le)
-            if cur_scores.data[label] >= cur_scores.max().data[0]: 
+            if cur_scores[label].item() >= cur_scores.max().item():
                 acc += 1
             label = create_var(torch.LongTensor([label]))
             all_loss.append( self.stereo_loss(cur_scores.view(1,-1), label) )
@@ -220,7 +221,7 @@ class JTPropVAE(nn.Module):
         
         l,r = 0, num_iter - 1
         while l < r - 1:
-            mid = (l + r) / 2
+            mid = (l + r) // 2
             new_vec = visited[mid]
             tree_vec,mol_vec = torch.chunk(new_vec, 2, dim=1)
             new_smiles = self.decode(tree_vec, mol_vec, prob_decode=False)
