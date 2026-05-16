@@ -34,6 +34,9 @@ class MolTreeNode(object):
 
         self.clique = [x for x in clique] #copy
         self.neighbors = []
+
+        self.cands = []
+        self.cand_mols = []
         
     def add_neighbor(self, nei_node):
         self.neighbors.append(nei_node)
