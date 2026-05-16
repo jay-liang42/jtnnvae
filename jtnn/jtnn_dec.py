@@ -129,10 +129,10 @@ class JTNNDecoder(nn.Module):
                 h[(x, y)] = new_h[i]
                 node_y.neighbors.append(node_x)
 
+                stop_target.append(direction)
                 if direction == 1:
                     pred_target.append(node_y.wid)
                     pred_list.append(i)
-                    stop_target.append(direction)
 
             cur_batch = create_var(torch.LongTensor(batch_list))
             cur_mol_vec = mol_vec.index_select(0, cur_batch)
