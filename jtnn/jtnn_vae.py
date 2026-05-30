@@ -133,7 +133,7 @@ class JTNNVAE(nn.Module):
                 batch_idx.extend([i] * len(node.cands))
 
         cand_vec = self.jtmpn(cands, tree_mess)
-        cand_vec = self.G_mean(cand_vec)
+        cand_vec = self.G_mean(cand_vec.cuda())
 
         batch_idx = create_var(torch.LongTensor(batch_idx))
         mol_vec = mol_vec.index_select(0, batch_idx)
@@ -188,7 +188,7 @@ class JTNNVAE(nn.Module):
         batch_idx = create_var(torch.LongTensor(batch_idx))
 
         stereo_cands = self.mpn(mol2graph(stereo_cands))
-        stereo_cands = self.G_mean(stereo_cands)
+        stereo_cands = self.G_mean(stereo_cands.cuda())
 
         stereo_labels = mol_vec.index_select(0, batch_idx)
 
