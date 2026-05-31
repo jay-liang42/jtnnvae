@@ -134,7 +134,7 @@ def grad_norm(m):
 total_step = args.load_epoch
 beta = args.beta
 
-meters = np.zeros(4)
+meters = np.zeros(5)
 meter_count = 0
 
 
@@ -193,8 +193,8 @@ for epoch in range(args.epoch):
 
             print(
                 f"[{total_step}] "
-                f"Beta: {beta:.3f}, KL: {meters[0]:.2f}, "
-                f"Word: {meters[1]:.2f}, Topo: {meters[2]:.2f}, "
+                f"Beta: {beta:.3f}, KL: {meters[2]:.2f}, "
+                f"Word: {meters[1]:.2f}, Topo: {meters[4]:.2f}, "
                 f"Assm: {meters[3]:.2f}, "
                 f"PNorm: {param_norm(model):.2f}, "
                 f"GNorm: {grad_norm(model):.2f}"
