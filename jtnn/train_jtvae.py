@@ -162,7 +162,7 @@ for epoch in range(args.epoch):
 
             mol_batch = [x[0] for x in batch]
 
-            loss, kl_div, wacc, tacc, sacc = model(mol_batch, beta)
+            loss, kl_div, wacc, tacc, sacc, dacc = model(mol_batch, beta)
 
             loss.backward()
 
@@ -179,12 +179,7 @@ for epoch in range(args.epoch):
         # ----------------------------
         # metrics
         # ----------------------------
-        meters += np.array([
-            kl_div,
-            wacc * 100,
-            tacc * 100,
-            sacc * 100
-        ])
+        meters += np.array([kl_div, wacc, tacc, sacc, dacc])
         meter_count += 1
 
 
